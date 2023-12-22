@@ -45,6 +45,10 @@ internal class LocalStorageJsonParser
             _context.Add(match);
         }
         MatchJsonMapper.Map(matchJson, match);
+        if (match.Id == 0)
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 
     private async Task HandlePlayersJsonAsync(string json)
