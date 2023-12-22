@@ -6,15 +6,13 @@ name: Docker
 # documentation.
 
 on:
-  schedule:
-    - cron: '20 17 * * *'
   push:
     branches: [ "main" ]
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
-  pull_request:
-    branches: [ "main" ]
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -114,4 +112,4 @@ jobs:
 
             # Pull the latest image and run it
             sudo docker pull ghcr.io/e-raskhodchikov/qlstats:main
-            sudo docker run -d -p 80:8080 --name qlstats -e ConnectionStrings__DefaultConnection="${{ secrets.CONNECTION_STRING }}" ghcr.io/e-raskhodchikov/qlstats:main
+            sudo docker run -d -p 80:8080 --name qlstats -e ConnectionStrings__DefaultConnection="${{ secrets.DEFAULT_CONNECTION_STRING }}" ghcr.io/e-raskhodchikov/qlstats:main
