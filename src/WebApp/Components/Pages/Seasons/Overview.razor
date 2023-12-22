@@ -1,0 +1,62 @@
+﻿@page "/seasons"
+@using Microsoft.EntityFrameworkCore
+@using QLStats.Domain.Entities
+@inject ApplicationDbContext Context
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Seasons | QLStats</PageTitle>
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item active" aria-current="page">Seasons</li>
+        <li class="breadcrumb-item"><a href="/seasons/new">New</a></li>
+    </ol>
+</nav>
+
+
+@if (seasons is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-hover table-sm">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Start</th>
+                <th>End</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var season in seasons)
+            {
+                <tr @onclick="@(() => ViewSeason(@season.Id))" style="cursor: pointer;">
+                    <td>@season.Id</td>
+                    <td>@season.StartsAt.ToString("yyyy.MM.dd")</td>
+                    <td>@season.EndsAt?.ToString("yyyy.MM.dd")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    List<Season>? seasons = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        seasons = await Context.Seasons
+            .AsNoTracking()
+            .OrderByDescending(x => x.StartsAt)
+            .ThenByDescending(x => x.EndsAt)
+            .ThenByDescending(x => x.Id)
+            .ToListAsync();
+    }
+
+    void ViewSeason(int id)
+    {
+        NavigationManager.NavigateTo($"/seasons/{id}");
+    }
+}

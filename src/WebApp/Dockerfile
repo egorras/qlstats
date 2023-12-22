@@ -12,6 +12,8 @@ WORKDIR /src
 COPY ["Directory.Packages.props", "."]
 COPY ["Directory.Build.props", "."]
 COPY ["src/WebApp/WebApp.csproj", "src/WebApp/"]
+COPY ["src/Infrastructure/Infrastructure.csproj", "src/Infrastructure/"]
+COPY ["src/Domain/Domain.csproj", "src/Domain/"]
 RUN dotnet restore "./src/WebApp/./WebApp.csproj"
 COPY . .
 WORKDIR "/src/src/WebApp"
