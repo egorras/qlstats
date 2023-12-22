@@ -29,7 +29,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var topScorer in TopScorers.OrderByDescending(x => x.TotalPts))
+                    @foreach (var topScorer in TopScorers)
                     {
                         <tr>
                             <td>@topScorer.Place</td>
@@ -109,13 +109,13 @@
             .OrderBy(x => x.Name)
             .ToList();
 
-        TopScorers = Players.Select((p, i) => (
-            p,
-            Matches
+        TopScorers = Players
+            .Select(p => (p, Matches
                 .SelectMany(x => x.PlayerStats)
                 .Where(x => x.PlayerId == p.Id)
-                .Sum(x => x.CalculatePtsFor(Season)),
-            i + 1))
+                .Sum(x => x.CalculatePtsFor(Season))))
+            .OrderByDescending(x => x.Item2)
+            .Select((t, i) => (t.p, t.Item2, i + 1))
             .ToList();
     }
 }
