@@ -8,6 +8,7 @@ public class MatchPlayerStats : BaseEntity
     public int PlayerId { get; set; }
     public virtual Player Player { get; set; } = null!;
 
+    public int Score { get; set; }
     public bool Win { get; set; }
     public Team? Team { get; set; }
     public int? TeamScore { get; set; }
@@ -27,6 +28,11 @@ public class MatchPlayerStats : BaseEntity
             if (season.PtsForClanArenaMatchWin > 0 && Win)
             {
                 pts += season.PtsForClanArenaMatchWin;
+            }
+
+            if (season.UseGameScore)
+            {
+                pts += Score;
             }
         }
 
