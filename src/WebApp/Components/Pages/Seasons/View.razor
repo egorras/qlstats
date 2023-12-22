@@ -1,7 +1,7 @@
 ﻿@page "/seasons/{Id:int}"
 @inject ApplicationDbContext Context
 @inject NavigationManager NavigationManager
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 <PageTitle>Season #@Id | QLStats</PageTitle>
 

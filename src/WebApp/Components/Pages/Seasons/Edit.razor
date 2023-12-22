@@ -3,7 +3,7 @@
 @inject ApplicationDbContext Context
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">

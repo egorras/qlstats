@@ -3,7 +3,7 @@
 @using QLStats.Domain.Entities
 @inject ApplicationDbContext Context
 @inject NavigationManager NavigationManager
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 <PageTitle>Seasons | QLStats</PageTitle>
 
