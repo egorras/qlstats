@@ -107,11 +107,11 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             # Check if the container is running and stop it
-            if [ $(docker ps -q -f name=qlstats) ]; then
-                docker stop qlstats
-                docker rm qlstats
+            if [ $(sudo docker ps -q -f name=qlstats) ]; then
+                sudo docker stop qlstats
+                sudo docker rm qlstats
             fi
 
             # Pull the latest image and run it
-            docker pull ghcr.io/e-raskhodchikov/qlstats:main
-            docker run -d --name qlstats -e ConnectionStrings__DefaultConnection="${{ secrets.CONNECTION_STRING }}" ghcr.io/e-raskhodchikov/qlstats:main
+            sudo docker pull ghcr.io/e-raskhodchikov/qlstats:main
+            sudo docker run -d --name qlstats -e ConnectionStrings__DefaultConnection="${{ secrets.CONNECTION_STRING }}" ghcr.io/e-raskhodchikov/qlstats:main
