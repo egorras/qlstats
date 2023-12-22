@@ -11,4 +11,25 @@ public class MatchPlayerStats : BaseEntity
     public bool Win { get; set; }
     public Team? Team { get; set; }
     public int? TeamScore { get; set; }
+
+    public int CalculatePtsFor(Season season)
+    {
+        var pts = 0;
+
+        // ClanArena
+        if (TeamScore != null)
+        {
+            if (season.PtsForClanArenaRoundWin > 0)
+            {
+                pts += TeamScore.Value * season.PtsForClanArenaRoundWin;
+            }
+
+            if (season.PtsForClanArenaMatchWin > 0 && Win)
+            {
+                pts += season.PtsForClanArenaMatchWin;
+            }
+        }
+
+        return pts;
+    }
 }

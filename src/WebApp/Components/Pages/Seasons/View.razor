@@ -13,16 +13,109 @@
     </ol>
 </nav>
 
+@if (Matches is not null)
+{
+    <div class="card mb-4" style="max-width: 200px;">
+        <div class="card-header">
+            Top Scorers
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover table-sm mb-0 table-bordered">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Player</th>
+                        <th>Pts</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var topScorer in TopScorers)
+                    {
+                        <tr>
+                            <td>@topScorer.Place</td>
+                            <td>@topScorer.Player.Name</td>
+                            <td>@topScorer.TotalPts</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            Matches
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover table-sm mb-0 table-bordered">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Map</th>
+
+                        @foreach (var player in Players)
+                        {
+                            <th>@player.Name</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var match in Matches)
+                    {
+                        <tr>
+                            <td>@match.PlayedAt.ToString("yyyy.MM.dd HH:mm")</td>
+                            <td>@match.Map</td>
+
+                            @foreach (var player in Players)
+                            {
+                                var playerStats = match.PlayerStats.FirstOrDefault(x => x.PlayerId == player.Id);
+                                <td class="text-end">@(playerStats?.CalculatePtsFor(Season) ?? 0)</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
 @code {
     [Parameter]
     public int? Id { get; set; }
 
     public Season Season { get; set; } = new();
 
+    List<Match>? Matches = null;
+    List<Player> Players = [];
+    List<(Player Player, int TotalPts, int Place)> TopScorers = [];
+
     protected override async Task OnParametersSetAsync()
     {
-        Season = await Context.Seasons
+        Season = await Context.Seasons.AsNoTracking().FirstAsync(x => x.Id == Id);
+
+        Matches = await Context.Matches
             .AsNoTracking()
-            .FirstAsync(x => x.Id == Id);
+            .AsSplitQuery()
+            .Include(x => x.PlayerStats).ThenInclude(x => x.Player)
+            .Where(x =>
+                x.PlayedAt.Date >= Season.StartsAt.Date &&
+                x.PlayedAt.Date <= Season.EndsAt.Date)
+            .OrderByDescending(x => x.PlayedAt)
+            .ToListAsync();
+
+        Players = Matches.SelectMany(x => x.PlayerStats)
+            .GroupBy(x => x.PlayerId)
+            .Select(x => x.First().Player)
+            .OrderBy(x => x.Name)
+            .ToList();
+
+        TopScorers = Players.Select((p, i) => (
+            p,
+            Matches
+                .SelectMany(x => x.PlayerStats)
+                .Where(x => x.PlayerId == p.Id)
+                .Sum(x => x.CalculatePtsFor(Season)),
+            i + 1))
+            .ToList();
     }
 }

@@ -1,16 +1,7 @@
-﻿namespace QLStats.Domain.Entities;
+﻿namespace QLStats.LocalStorageParser.Models;
 
-public class Match : BaseEntity
+public record MatchJson
 {
-    public Guid MatchGuid { get; set; }
-    public string Map { get; set; } = default!;
-
-    public DateTime PlayedAt { get; set; }
-    public int? TeamBlueScore { get; set; }
-    public int? TeamRedScore { get; set; }
-
-    public List<MatchPlayerStats> PlayerStats { get; set; } = null!;
-
     public bool Aborted { get; set; }
     public int CaptureLimit { get; set; }
     public string ExitMsg { get; set; } = default!;
@@ -20,17 +11,22 @@ public class Match : BaseEntity
     public int FragLimit { get; set; }
     public int GameLength { get; set; }
     public string GameType { get; set; } = default!;
-    public bool Infected { get; set; }
-    public bool Instagib { get; set; }
+    public int Infected { get; set; }
+    public int Instagib { get; set; }
     public int LastLeadChangeTime { get; set; }
-    public string? LastScorer { get; set; } = default!;
-    public string? LastTeamscorer { get; set; } = default!;
+    public string LastScorer { get; set; } = default!;
+    public string LastTeamscorer { get; set; } = default!;
+    public string Map { get; set; } = default!;
+    public Guid MatchGuid { get; set; }
     public int MercyLimit { get; set; }
-    public bool Quadhog { get; set; }
-    public bool Restarted { get; set; }
+    public int Quadhog { get; set; }
+    public int Restarted { get; set; }
     public int RoundLimit { get; set; }
     public int ScoreLimit { get; set; }
     public string ServerTitle { get; set; } = default!;
     public int TimeLimit { get; set; }
-    public bool Training { get; set; }
+    public int Training { get; set; }
+    public int Tscore0 { get; set; }
+    public int Tscore1 { get; set; }
+    public long TimePlayed { get; set; }
 }

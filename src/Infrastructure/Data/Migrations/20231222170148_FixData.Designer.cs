@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QLStats.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using QLStats.Infrastructure.Data;
 namespace QLStats.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231222170148_FixData")]
+    partial class FixData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -74,7 +77,7 @@ namespace QLStats.Infrastructure.Migrations
                     b.Property<string>("LastScorer")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LastTeamscorer")
+                    b.Property<string>("LastTeamScorer")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Map")
@@ -103,6 +106,10 @@ namespace QLStats.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ServerTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
