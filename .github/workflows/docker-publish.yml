@@ -14,6 +14,7 @@ on:
     tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -97,3 +98,20 @@ jobs:
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+
+      - name: SSH and Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            # Check if the container is running and stop it
+            if [ $(docker ps -q -f name=qlstats) ]; then
+                docker stop qlstats
+                docker rm qlstats
+            fi
+
+            # Pull the latest image and run it
+            docker pull ghcr.io/e-raskhodchikov/qlstats:main
+            docker run -d --name qlstats -e ConnectionStrings__DefaultConnection="${{ secrets.CONNECTION_STRING }}" ghcr.io/e-raskhodchikov/qlstats:main
