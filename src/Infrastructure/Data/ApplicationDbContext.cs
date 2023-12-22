@@ -10,6 +10,9 @@ public class ApplicationDbContext : DbContext
     {
     }
 
+    public DbSet<Match> Matches => Set<Match>();
+    public DbSet<MatchPlayerStats> MatchPlayerStats => Set<MatchPlayerStats>();
+    public DbSet<Player> Players => Set<Player>();
     public DbSet<Season> Seasons => Set<Season>();
 
     protected override void OnModelCreating(ModelBuilder builder)
