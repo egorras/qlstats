@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  
+  <PropertyGroup>
+    <RootNamespace>QLStats.WebApp</RootNamespace>
+    <AssemblyName>QLStats.WebApp</AssemblyName>
+    <UserSecretsId>e4ce7d75-8203-4646-8a5c-e02bfeb29e50</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..</DockerfileContext>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
+  </ItemGroup>
+  
+</Project>
