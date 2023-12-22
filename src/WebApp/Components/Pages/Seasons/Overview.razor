@@ -35,7 +35,7 @@ else
                 <tr @onclick="@(() => ViewSeason(@season.Id))" style="cursor: pointer;">
                     <td>@season.Id</td>
                     <td>@season.StartsAt.ToString("yyyy.MM.dd")</td>
-                    <td>@season.EndsAt?.ToString("yyyy.MM.dd")</td>
+                    <td>@season.EndsAt.ToString("yyyy.MM.dd")</td>
                 </tr>
             }
         </tbody>

@@ -1,0 +1,98 @@
+﻿@page "/seasons/new"
+@page "/seasons/{Id:int}/edit"
+@inject ApplicationDbContext Context
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
+@rendermode InteractiveServer
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/seasons">Seasons</a></li>
+        @if (Id is not null)
+        {
+            <li class="breadcrumb-item" aria-current="page"><a href="/seasons/@Id">@Season.ToString()</a></li>
+            <li class="breadcrumb-item active">Edit</li>
+        }
+        else
+        {
+            <li class="breadcrumb-item active">New Season</li>
+        }
+    </ol>
+</nav>
+
+@if (Id is null)
+{
+    <PageTitle>New Season | QLStats</PageTitle>
+    <h3>New Season</h3>
+}
+else
+{
+    <PageTitle>Season #@Id Edit | QLStats</PageTitle>
+    <h3>Season #@Id</h3>
+}
+
+<EditForm Model="Season" OnValidSubmit="HandleSubmit" class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label">Start</label>
+        <InputDate class="form-control" @bind-Value="Season.StartsAt"></InputDate>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">End</label>
+        <InputDate class="form-control" @bind-Value="Season.EndsAt"></InputDate>
+    </div>
+
+    <button type="submit" class="btn btn-primary me-1">Save</button>
+
+    @if (Id is not null)
+    {
+        <button type="button" class="btn btn-danger" @onclick="@(() => DeleteSeason())">Delete</button>
+    }
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    public Season Season { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id is not null)
+        {
+            Season = await Context.Seasons.FirstAsync(x => x.Id == Id);
+        }
+        else
+        {
+            Season.StartsAt = DateTime.UtcNow;
+            Season.EndsAt = Season.StartsAt.AddDays(7);
+        }
+    }
+
+    async Task HandleSubmit()
+    {
+        if (Id is null)
+        {
+            Context.Add(Season);
+        }
+
+        if (Season.EndsAt < Season.StartsAt)
+        {
+            Season.EndsAt = Season.StartsAt;
+        }
+
+        await Context.SaveChangesAsync();
+        NavigationManager.NavigateTo($"/seasons/{Season.Id}");
+    }
+
+    private async Task DeleteSeason()
+    {
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirmed)
+        {
+            Context.Seasons.Remove(Season);
+            await Context.SaveChangesAsync();
+            NavigationManager.NavigateTo("/seasons");
+        }
+    }
+}

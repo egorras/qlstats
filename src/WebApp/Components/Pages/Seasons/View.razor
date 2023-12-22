@@ -1,0 +1,28 @@
+﻿@page "/seasons/{Id:int}"
+@inject ApplicationDbContext Context
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Season #@Id | QLStats</PageTitle>
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/seasons">Seasons</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Season.ToString()</li>
+        <li class="breadcrumb-item"><a href="/seasons/@Id/edit">Edit</a></li>
+    </ol>
+</nav>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    public Season Season { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Season = await Context.Seasons
+            .AsNoTracking()
+            .FirstAsync(x => x.Id == Id);
+    }
+}
