@@ -40,6 +40,14 @@ else
         <label class="form-label">End</label>
         <InputDate class="form-control" @bind-Value="Season.EndsAt"></InputDate>
     </div>
+    <div class="col-md-12">
+        <label class="form-label">Clan Arena round win</label>
+        <InputNumber class="form-control" @bind-Value="Season.PtsForClanArenaRoundWin"></InputNumber>
+    </div>
+    <div class="col-md-12">
+        <label class="form-label">Clan Arena match win</label>
+        <InputNumber class="form-control" @bind-Value="Season.PtsForClanArenaMatchWin"></InputNumber>
+    </div>
 
     <button type="submit" class="btn btn-primary me-1">Save</button>
 
