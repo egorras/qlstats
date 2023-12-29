@@ -1,4 +1,5 @@
 ﻿@page "/seasons/{Id:int}"
+@using QLStats.Domain.Enums
 @inject ApplicationDbContext Context
 @inject NavigationManager NavigationManager
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
@@ -69,7 +70,17 @@
                             @foreach (var player in Players)
                             {
                                 var playerStats = match.PlayerStats.FirstOrDefault(x => x.PlayerId == player.Id);
-                                <td class="text-end">@(playerStats?.CalculatePtsFor(Season) ?? 0)</td>
+                                var background = string.Empty;
+                                if (playerStats?.Team == Team.Red)
+                                {
+                                    background = "bg-danger";
+                                }
+                                else if (playerStats?.Team == Team.Blue)
+                                {
+                                    background = "bg-primary";
+                                }
+
+                                <td class="text-end @background">@(playerStats?.CalculatePtsFor(Season) ?? 0)</td>
                             }
                         </tr>
                     }
