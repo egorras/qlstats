@@ -12,10 +12,12 @@ public class MatchPlayerStats : BaseEntity
     public bool Win { get; set; }
     public Team? Team { get; set; }
     public int? TeamScore { get; set; }
+    public int DamageDealt { get; set; }
+    public int DamageTaken { get; set; }
 
-    public int CalculatePtsFor(Season season)
+    public decimal CalculatePtsFor(Season season)
     {
-        var pts = 0;
+        var pts = decimal.Zero;
 
         // ClanArena
         if (TeamScore != null)
@@ -33,6 +35,11 @@ public class MatchPlayerStats : BaseEntity
             if (season.UseGameScore)
             {
                 pts += Score;
+            }
+
+            if (season.DamageForOnePts > 0)
+            {
+                pts += Math.Floor(DamageDealt / season.DamageForOnePts.Value);
             }
         }
 

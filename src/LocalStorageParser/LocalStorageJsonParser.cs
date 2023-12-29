@@ -89,6 +89,8 @@ internal class LocalStorageJsonParser
 
             playerStats.Win = playerStatsJson.Win == 1;
             playerStats.Score = playerStatsJson.Score;
+            playerStats.DamageDealt = playerStatsJson.Damage.Dealt;
+            playerStats.DamageTaken = playerStatsJson.Damage.Taken;
 
             if (playerStatsJson.Team != null)
             {

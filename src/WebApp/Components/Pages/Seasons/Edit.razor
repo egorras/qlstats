@@ -49,6 +49,10 @@ else
         <InputNumber class="form-control" @bind-Value="Season.PtsForClanArenaMatchWin"></InputNumber>
     </div>
     <div class="col-md-12">
+        <label class="form-label">Damage dealt for +1 pts</label>
+        <InputNumber class="form-control" @bind-Value="Season.DamageForOnePts"></InputNumber>
+    </div>
+    <div class="col-md-12">
         <div class="form-check">
             <input class="form-check-input" type="checkbox" id="useGameScore" @bind-value="@Season.UseGameScore">
             <label class="form-check-label" for="useGameScore">

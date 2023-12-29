@@ -8,4 +8,11 @@ public record PlayerStatsJson
     public int Score { get; set; }
     public int? Team { get; set; }
     public int Win { get; set; }
+    public DamageJson Damage { get; set; } = new();
+}
+
+public record DamageJson
+{
+    public int Dealt { get; set; }
+    public int Taken { get; set; }
 }
