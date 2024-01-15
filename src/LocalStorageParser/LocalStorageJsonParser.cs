@@ -35,7 +35,7 @@ internal class LocalStorageJsonParser
         var matchJson = JsonSerializer.Deserialize<MatchJson>(json, ReadOptions)!;
         if (_parsedMatchGuids.Contains(matchJson.MatchGuid))
         {
-            return;
+            //return;
         }
 
         var match = await _context.Matches.FirstOrDefaultAsync(x => x.MatchGuid == matchJson.MatchGuid);
@@ -62,7 +62,7 @@ internal class LocalStorageJsonParser
         var matchGuid = list.PlyrStats[0].MatchGuid;
         if (_parsedMatchGuids.Contains(matchGuid))
         {
-            return;
+            //return;
         }
 
         var match = await _context.Matches
@@ -91,6 +91,7 @@ internal class LocalStorageJsonParser
             playerStats.Score = playerStatsJson.Score;
             playerStats.DamageDealt = playerStatsJson.Damage.Dealt;
             playerStats.DamageTaken = playerStatsJson.Damage.Taken;
+            playerStats.MedalsTotal = playerStatsJson.Medals.Total;
 
             if (playerStatsJson.Team != null)
             {

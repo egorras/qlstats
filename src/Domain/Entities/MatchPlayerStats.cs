@@ -14,6 +14,7 @@ public class MatchPlayerStats : BaseEntity
     public int? TeamScore { get; set; }
     public int DamageDealt { get; set; }
     public int DamageTaken { get; set; }
+    public int MedalsTotal { get; set; }
 
     public decimal CalculatePtsFor(Season season)
     {
@@ -31,16 +32,21 @@ public class MatchPlayerStats : BaseEntity
             {
                 pts += season.PtsForClanArenaMatchWin;
             }
+        }
 
-            if (season.UseGameScore)
-            {
-                pts += Score;
-            }
+        if (season.UseGameScore)
+        {
+            pts += Score;
+        }
 
-            if (season.DamageForOnePts > 0)
-            {
-                pts += Math.Floor(DamageDealt / season.DamageForOnePts.Value);
-            }
+        if (season.DamageForOnePts > 0)
+        {
+            pts += Math.Floor(DamageDealt / season.DamageForOnePts.Value);
+        }
+
+        if (season.PtsPerMedal > 0)
+        {
+            pts += MedalsTotal * season.PtsPerMedal;
         }
 
         return pts;

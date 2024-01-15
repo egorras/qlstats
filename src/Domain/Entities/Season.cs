@@ -9,6 +9,7 @@ public class Season : BaseEntity
     public int PtsForClanArenaMatchWin { get; set; } = 3;
     public bool UseGameScore { get; set; } = false;
     public decimal? DamageForOnePts { get; set; } = 100;
+    public int PtsPerMedal { get; set; } = 0;
 
     public override string ToString()
     {
