@@ -14,6 +14,11 @@
     </ol>
 </nav>
 
+@if (!string.IsNullOrWhiteSpace(Season.Name))
+{
+    <h1>@Season.Name</h1>
+}
+
 @if (Matches is not null)
 {
     <div class="card mb-4" style="max-width: 200px;">
@@ -73,14 +78,19 @@
                                 var background = string.Empty;
                                 if (playerStats?.Team == Team.Red)
                                 {
-                                    background = "bg-danger";
+                                    background = "Tomato";
                                 }
                                 else if (playerStats?.Team == Team.Blue)
                                 {
-                                    background = "bg-primary";
+                                    background = "Dodgerblue";
                                 }
 
-                                <td class="text-end @background">@(playerStats?.CalculatePtsFor(Season) ?? 0)</td>
+                                <td class="text-end">
+                                    <span style="color: @background;">
+                                        <i class="fa-solid fa-square"></i>
+                                    </span>
+                                    @(playerStats?.CalculatePtsFor(Season) ?? 0)
+                                </td>
                             }
                         </tr>
                     }
