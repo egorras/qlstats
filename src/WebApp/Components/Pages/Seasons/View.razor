@@ -86,10 +86,10 @@
                                 }
 
                                 <td class="text-end">
+                                    @(playerStats?.CalculatePtsFor(Season) ?? 0)
                                     <span style="color: @background;">
                                         <i class="fa-solid fa-square"></i>
                                     </span>
-                                    @(playerStats?.CalculatePtsFor(Season) ?? 0)
                                 </td>
                             }
                         </tr>
