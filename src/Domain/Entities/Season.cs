@@ -13,6 +13,6 @@ public class Season : BaseEntity
 
     public override string ToString()
     {
-        return $"Season #{Id} {Name} ({StartsAt:yyyy.MM.dd} - {EndsAt:yyyy.MM.dd})";
+        return $"Season #{Id} ({StartsAt:yyyy.MM.dd} - {EndsAt:yyyy.MM.dd})";
     }
 }
