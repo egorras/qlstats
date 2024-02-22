@@ -14,8 +14,10 @@ public static class DependencyInjection
 
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
-            options.UseSqlServer(connectionString, builder
-                => builder.EnableRetryOnFailure());
+            options.UseNpgsql(connectionString, builder
+                => builder
+                    .EnableRetryOnFailure()
+                    .MigrationsHistoryTable("__EFMigrationsHistory", "QLSTATS"));
         });
 
         services.AddScoped<ApplicationDbContextInitialiser>();

@@ -101,6 +101,8 @@ else
             Season.EndsAt = Season.StartsAt;
         }
 
+        Season.StartsAt = DateTime.SpecifyKind(Season.StartsAt, DateTimeKind.Utc);
+        Season.EndsAt = DateTime.SpecifyKind(Season.EndsAt, DateTimeKind.Utc);
         await Context.SaveChangesAsync();
         NavigationManager.NavigateTo($"/seasons/{Season.Id}");
     }

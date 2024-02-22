@@ -19,7 +19,9 @@ static async Task RunAsync(CommandLineOptions options)
     var serviceProvider = new ServiceCollection()
         .AddScoped<LocalStorageJsonParser>()
         .AddDbContext<ApplicationDbContext>(x =>
-            x.UseSqlServer(options.ConnectionString, x => x.EnableRetryOnFailure()))
+            x.UseNpgsql(options.ConnectionString, x => x
+                .EnableRetryOnFailure()
+                .MigrationsHistoryTable("__EFMigrationsHistory", "QLSTATS")))
         .BuildServiceProvider();
 
     using var scope = serviceProvider.CreateScope();
