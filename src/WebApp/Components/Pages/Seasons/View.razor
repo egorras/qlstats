@@ -21,40 +21,54 @@
 
 @if (Matches is not null)
 {
-    <div class="card mb-4" style="max-width: 200px;">
-        <div class="card-header">
-            Top Scorers
+    <div class="row">
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-header">
+                    Top Scorers
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover table-sm mb-0 table-bordered">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Player</th>
+                                <th>Pts</th>
+                                <th>Diff</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var topScorer in TopScorers)
+                            {
+                                <tr>
+                                    <td>@topScorer.Place</td>
+                                    <td>@topScorer.Player.Name</td>
+                                    <td>@topScorer.TotalPts</td>
+                                    <td>
+                                        @{
+                                            var aheadTotalPts = TopScorers.FirstOrDefault(x => x.Place == topScorer.Place - 1).TotalPts;
+                                        }
+                                        @if (aheadTotalPts > 0)
+                                        {
+                                            <span>@(topScorer.TotalPts - aheadTotalPts)</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="card-body p-0">
-            <table class="table table-hover table-sm mb-0 table-bordered">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Player</th>
-                        <th>Pts</th>
-                        <th>Diff</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var topScorer in TopScorers)
-                    {
-                        <tr>
-                            <td>@topScorer.Place</td>
-                            <td>@topScorer.Player.Name</td>
-                            <td>@topScorer.TotalPts</td>
-                            <td>
-                                @{
-                                    var aheadTotalPts = TopScorers.FirstOrDefault(x => x.Place == topScorer.Place - 1).TotalPts;
-                                }
-                                @if (aheadTotalPts > 0)
-                                {
-                                    <span>@(topScorer.TotalPts - aheadTotalPts)</span>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        <div class="col-md-10">
+            <div>
+                <MudChart ChartType="ChartType.Line"
+                        ChartSeries="@Series"
+                        @bind-SelectedIndex="Index"
+                        Width="100%"
+                        Height="500px"
+                        ChartOptions="@Options" />
+            </div>
         </div>
     </div>
 
@@ -120,6 +134,10 @@
     List<Player> Players = [];
     List<(Player Player, decimal TotalPts, int Place)> TopScorers = [];
 
+    private int Index = -1;
+    public ChartOptions Options = new ChartOptions();
+    public List<ChartSeries> Series = [];
+
     protected override async Task OnParametersSetAsync()
     {
         Season = await Context.Seasons.AsNoTracking().FirstAsync(x => x.Id == Id);
@@ -139,6 +157,21 @@
             .Select(x => x.First().Player)
             .OrderBy(x => x.Name)
             .ToList();
+
+        foreach (var player in Players)
+        {
+            double runningTotal = 0;
+            Series.Add(new ChartSeries
+                {
+                    Name = player.Name,
+                    Data = Matches.OrderBy(x => x.PlayedAt).Select(x =>
+                    {
+                        var stats = x.PlayerStats.FirstOrDefault(x => x.PlayerId == player.Id);
+                        runningTotal += (double?)stats?.CalculatePtsFor(Season) ?? 0;
+                        return runningTotal;
+                    }).ToArray()
+                });
+        }
 
         TopScorers = Players
             .Select(p => (p, Matches

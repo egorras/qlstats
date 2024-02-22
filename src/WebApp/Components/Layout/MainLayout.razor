@@ -17,3 +17,9 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" />
+
+@code {
+    private bool _isDarkMode = true;
+}
