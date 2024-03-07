@@ -148,7 +148,8 @@
             .Include(x => x.PlayerStats).ThenInclude(x => x.Player)
             .Where(x =>
                 x.PlayedAt.Date >= Season.StartsAt.Date &&
-                x.PlayedAt.Date <= Season.EndsAt.Date)
+                x.PlayedAt.Date <= Season.EndsAt.Date &&
+                x.GameType == "CA")
             .OrderByDescending(x => x.PlayedAt)
             .ToListAsync();
 
