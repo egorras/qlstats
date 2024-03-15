@@ -82,7 +82,8 @@
                     <tr>
                         <th>Time</th>
                         <th>Map</th>
-
+                        <th>Red</th>
+                        <th>Blue</th>
                         @foreach (var player in Players)
                         {
                             <th>@player.Name</th>
@@ -95,7 +96,18 @@
                         <tr>
                             <td>@match.PlayedAt.ToString("yyyy.MM.dd HH:mm")</td>
                             <td>@match.Map</td>
-
+                            <td class="text-end">
+                                @match.TeamRedScore
+                                <span style="color: Tomato;">
+                                    <i class="fa-solid fa-square"></i>
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                @match.TeamBlueScore
+                                <span style="color: Dodgerblue;">
+                                    <i class="fa-solid fa-square"></i>
+                                </span>
+                            </td>
                             @foreach (var player in Players)
                             {
                                 var playerStats = match.PlayerStats
@@ -112,9 +124,49 @@
                                 }
 
                                 <td class="text-end">
-                                    @(playerStats?.CalculatePtsFor(Season) ?? 0)
+                                    <b>@(playerStats?.CalculatePtsFor(Season) ?? 0)</b>
                                     <span style="color: @background;">
                                         <i class="fa-solid fa-square"></i>
+                                    </span>
+                                    <span class="text-secondary">
+                                        @if (playerStats != null)
+                                    {
+                                        @if(Season.DamageForOnePts > 0)
+                                        {
+                                            <br />
+                                            @(playerStats.DamageDealt)
+                                            <span> (+</span>
+                                            @(Math.Floor(playerStats.DamageDealt / Season.DamageForOnePts.Value))
+                                            <span>) </span>
+                                            <i class="fa-solid fa-bolt"></i>
+                                        }
+
+                                        @if (Season.PtsPerMedal > 0)
+                                        {
+                                            <br />
+                                            @(playerStats.MedalsTotal)
+                                            <span> (+</span>
+                                            @(Season.PtsPerMedal * playerStats.MedalsTotal)
+                                            <span>) </span>
+                                            <i class="fa-solid fa-medal"></i>
+                                        }
+
+                                        <br />
+                                        @(playerStats.TeamScore)
+                                        <span> (+</span>
+                                        @(Season.PtsForClanArenaRoundWin * playerStats.TeamScore)
+                                        <span>)</span>
+                                        <i class="fa-solid fa-circle"></i>
+
+                                        @if (playerStats.Win)
+                                        {
+                                            <br />
+                                            <span>(+</span>
+                                            @(Season.PtsForClanArenaMatchWin)
+                                            <span>) </span>
+                                            <i class="fa-solid fa-trophy"></i>
+                                        }
+                                    }
                                     </span>
                                 </td>
                             }
