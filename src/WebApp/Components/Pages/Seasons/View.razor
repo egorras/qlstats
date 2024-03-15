@@ -98,7 +98,9 @@
 
                             @foreach (var player in Players)
                             {
-                                var playerStats = match.PlayerStats.FirstOrDefault(x => x.PlayerId == player.Id);
+                                var playerStats = match.PlayerStats
+                                    .Where(x => x.Score > 0)
+                                    .FirstOrDefault(x => x.PlayerId == player.Id);
                                 var background = string.Empty;
                                 if (playerStats?.Team == Team.Red)
                                 {
