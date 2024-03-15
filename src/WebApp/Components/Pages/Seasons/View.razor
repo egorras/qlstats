@@ -167,7 +167,8 @@
                     Name = player.Name,
                     Data = Matches.OrderBy(x => x.PlayedAt).Select(x =>
                     {
-                        var stats = x.PlayerStats.FirstOrDefault(x => x.PlayerId == player.Id);
+                        var stats = x.PlayerStats
+                        .Where(x => x.Score > 0).FirstOrDefault(x => x.PlayerId == player.Id);
                         runningTotal += (double?)stats?.CalculatePtsFor(Season) ?? 0;
                         return runningTotal;
                     }).ToArray()
