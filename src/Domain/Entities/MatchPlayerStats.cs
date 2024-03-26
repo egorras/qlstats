@@ -32,6 +32,11 @@ public class MatchPlayerStats : BaseEntity
             {
                 pts += season.PtsForClanArenaMatchWin;
             }
+
+            if (Player.Name == "раший")
+            {
+                pts += 10;
+            }
         }
 
         if (season.UseGameScore)
