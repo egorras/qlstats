@@ -16,6 +16,6 @@
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
     <PackageVersion Include="MudBlazor" Version="6.16.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
-    <PackageVersion Include="Riok.Mapperly" Version="3.3.0" />
+    <PackageVersion Include="Riok.Mapperly" Version="3.6.0" />
   </ItemGroup>
 </Project>
