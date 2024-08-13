@@ -9,17 +9,17 @@
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/seasons">Seasons</a></li>
-        <li class="breadcrumb-item active" aria-current="page">@Season.ToString()</li>
+        <li class="breadcrumb-item active" aria-current="page">@Season?.ToString()</li>
         <li class="breadcrumb-item"><a href="/seasons/@Id/edit">Edit</a></li>
     </ol>
 </nav>
 
-@if (!string.IsNullOrWhiteSpace(Season.Name))
+@if (!string.IsNullOrWhiteSpace(Season?.Name))
 {
     <h1>@Season.Name</h1>
 }
 
-@if (Matches is not null)
+@if (Matches is not null && Season is not null)
 {
     <div class="row">
         <div class="col-md-2">
@@ -192,7 +192,7 @@
     [Parameter]
     public int? Id { get; set; }
 
-    public Season Season { get; set; } = new();
+    public Season? Season { get; set; } = new();
 
     List<Match>? Matches = null;
     List<Player> Players = [];
@@ -202,47 +202,93 @@
     public ChartOptions Options = new ChartOptions();
     public List<ChartSeries> Series = [];
 
-    protected override async Task OnParametersSetAsync()
+    private Timer? _pollingTimer;
+
+    protected override async Task OnInitializedAsync()
     {
-        Season = await Context.Seasons.AsNoTracking().FirstAsync(x => x.Id == Id);
+        await LoadDataAsync();
+        StartPolling();
+    }
 
-        Matches = await Context.Matches
-            .AsNoTracking()
-            .AsSplitQuery()
-            .Include(x => x.PlayerStats).ThenInclude(x => x.Player)
-            .Where(x =>
-                x.PlayedAt.Date >= Season.StartsAt.Date &&
-                x.PlayedAt.Date <= Season.EndsAt.Date &&
-                x.GameType == "CA")
-            .OrderByDescending(x => x.PlayedAt)
-            .ToListAsync();
-
-        Players = Matches.SelectMany(x => x.PlayerStats)
-            .GroupBy(x => x.PlayerId)
-            .Select(x => x.First().Player)
-            .OrderBy(x => x.Name)
-            .ToList();
-
-        foreach (var player in Players)
+    private void StartPolling()
+    {
+        _pollingTimer = new Timer(async _ =>
         {
-            double runningTotal = 0;
-            Series.Add(new ChartSeries
-                {
-                    Name = player.Name,
-                    Data = Matches.OrderBy(x => x.PlayedAt).Select(x =>
-                    {
-                        var stats = x.PlayerStats
-                        .Where(x => x.Score > 0).FirstOrDefault(x => x.PlayerId == player.Id);
-                        runningTotal += (double?)stats?.CalculatePtsFor(Season) ?? 0;
-                        return runningTotal;
-                    }).ToArray()
-                });
-            TopScorers.Add(new(player, (decimal)runningTotal, 0));
+            await LoadDataAsync();
+            await InvokeAsync(StateHasChanged);
+        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
+    }
+
+    private async Task LoadDataAsync()
+    {
+        if (Id == null)
+        {
+            NavigationManager.NavigateTo("/seasons");
+            return;
         }
 
-        TopScorers = TopScorers
-            .OrderByDescending(x => x.TotalPts)
-            .Select((x, i) => (x.Player, x.TotalPts, i + 1))
-            .ToList();
+        try
+        {
+            Season = await Context.Seasons.AsNoTracking().FirstOrDefaultAsync(x => x.Id == Id);
+
+            if (Season == null)
+            {
+                NavigationManager.NavigateTo("/seasons");
+                return;
+            }
+
+            Matches = await Context.Matches
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Include(x => x.PlayerStats).ThenInclude(x => x.Player)
+                .Where(x =>
+                    x.PlayedAt.Date >= Season.StartsAt.Date &&
+                    x.PlayedAt.Date <= Season.EndsAt.Date &&
+                    x.GameType == "CA")
+                .OrderByDescending(x => x.PlayedAt)
+                .ToListAsync();
+
+            Players = Matches.SelectMany(x => x.PlayerStats)
+                .GroupBy(x => x.PlayerId)
+                .Select(x => x.First().Player)
+                .OrderBy(x => x.Name)
+                .ToList();
+
+            TopScorers.Clear();
+            Series.Clear();
+            foreach (var player in Players)
+            {
+                double runningTotal = 0;
+                Series.Add(new ChartSeries
+                    {
+                        Name = player.Name,
+                        Data = Matches.OrderBy(x => x.PlayedAt).Select(x =>
+                        {
+                            var stats = x.PlayerStats
+                            .Where(x => x.Score > 0).FirstOrDefault(x => x.PlayerId == player.Id);
+                            runningTotal += (double?)stats?.CalculatePtsFor(Season) ?? 0;
+                            return runningTotal;
+                        }).ToArray()
+                    });
+                TopScorers.Add(new(player, (decimal)runningTotal, 0));
+            }
+
+            TopScorers = TopScorers
+                .OrderByDescending(x => x.TotalPts)
+                .Select((x, i) => (x.Player, x.TotalPts, i + 1))
+                .ToList();
+        }
+        catch (Exception)
+        {
+            NavigationManager.NavigateTo("/seasons");
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_pollingTimer is not null)
+        {
+            await _pollingTimer.DisposeAsync();
+        }
     }
 }
