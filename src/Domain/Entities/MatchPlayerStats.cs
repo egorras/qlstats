@@ -50,6 +50,11 @@ public class MatchPlayerStats : BaseEntity
             pts += MedalsTotal * season.PtsPerMedal;
         }
 
+        if (season.PtsPerKill > 0)
+        {
+            pts += Kills * season.PtsPerKill;
+        }
+
         return pts;
     }
 }
