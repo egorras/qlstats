@@ -10,6 +10,7 @@ public record PlayerStatsJson
     public int Score { get; set; }
     public int? Team { get; set; }
     public int Win { get; set; }
+    public int Kills { get; set; }
     public DamageJson Damage { get; set; } = new();
     public MedalsJson Medals { get; set; } = new();
 }

@@ -9,6 +9,7 @@ public class MatchPlayerStats : BaseEntity
     public virtual Player Player { get; set; } = null!;
 
     public int Score { get; set; }
+    public int Kills { get; set; }
     public bool Win { get; set; }
     public Team? Team { get; set; }
     public int? TeamScore { get; set; }
