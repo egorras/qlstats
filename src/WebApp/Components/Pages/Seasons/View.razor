@@ -111,7 +111,6 @@
                             @foreach (var player in Players)
                             {
                                 var playerStats = match.PlayerStats
-                                    .Where(x => x.Score > 0)
                                     .FirstOrDefault(x => x.PlayerId == player.Id);
                                 var background = string.Empty;
                                 if (playerStats?.Team == Team.Red)
@@ -177,16 +176,15 @@
                                             <i class="fa-solid fa-trophy"></i>
                                         }
 
-                                        @if (Season.PtsPerSuicide != 0)
-                                        {
-                                            <br />
-                                            @(playerStats.Suicides)
-                                            @* <span> (</span>
-                                            @(Season.PtsPerSuicide * playerStats.Suicides)
-                                            <span>)</span> *@
-                                            <i class="fa-solid fa-person-falling"></i>
+                                            @if (Season.PtsPerSuicide != 0 && playerStats.Suicides > 0)
+                                            {
+                                                <br />
+                                                <span>(-</span>
+                                                @(playerStats.Suicides)
+                                                <span>)</span>
+                                                <i class="fa-solid fa-person-falling"></i>
+                                            }
                                         }
-                                    }
                                     </span>
                                 </td>
                             }

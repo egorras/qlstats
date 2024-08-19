@@ -58,9 +58,22 @@ using (var subscriber = new SubscriberSocket())
                         MatchGuid = data.MATCH_GUID,
                         ServerTitle = string.Empty,
                         LastTeamscorer = string.Empty,
-                        Map = data.MAP
+                        Map = data.MAP,
+                        PlayerStats = []
                     };
                     context.Add(match);
+
+                    foreach (var playerData in data.PLAYERS)
+                    {
+                        var steamId = long.Parse(playerData.STEAM_ID);
+                        var player = await context.Players.FirstAsync(x => x.SteamId == steamId);
+                        match.PlayerStats.Add(new MatchPlayerStats
+                        {
+                            Player = player,
+                            Team = playerData.TEAM == 1 ? Team.Red : Team.Blue,
+                            TeamScore = 0
+                        });
+                    }
 
                     suicideSteamId.Clear();
                 }
@@ -89,6 +102,29 @@ using (var subscriber = new SubscriberSocket())
                     if (match is null)
                     {
                         continue;
+                    }
+
+                    Team? teamWon = data.TEAM_WON == "RED"
+                        ? Team.Red
+                        : data.TEAM_WON == "BLUE"
+                        ? Team.Blue
+                        : null;
+
+                    if (teamWon is not null)
+                    {
+                        foreach (var playerStat in match.PlayerStats.Where(x => x.Team == teamWon))
+                        {
+                            playerStat.TeamScore += 1;
+                        }
+
+                        if (teamWon == Team.Red)
+                        {
+                            match.TeamRedScore += 1;
+                        }
+                        else
+                        {
+                            match.TeamBlueScore += 1;
+                        }
                     }
 
                     var suicideTimeout = 13;
@@ -130,8 +166,8 @@ using (var subscriber = new SubscriberSocket())
                     playerStats.Kills = data.KILLS;
                     playerStats.Win = data.WIN == 1;
                     playerStats.Score = data.SCORE;
-                    playerStats.DamageDealt = data.Damage.Dealt;
-                    playerStats.DamageTaken = data.Damage.Taken;
+                    playerStats.DamageDealt = data.DAMAGE.DEALT;
+                    playerStats.DamageTaken = data.DAMAGE.TAKEN;
 
                     if (data.TEAM != null)
                     {
@@ -147,6 +183,25 @@ using (var subscriber = new SubscriberSocket())
                     }
 
                     suicideSteamId.Clear();
+                }
+                break;
+
+            case "MATCH_REPORT":
+                {
+                    var data = JsonSerializer.Deserialize<EventData<MatchReportEventData>>(message)!.DATA;
+                    var match = await context.Matches.Include(x => x.PlayerStats).FirstOrDefaultAsync(x => x.MatchGuid == data.MATCH_GUID);
+                    if (match is null)
+                    {
+                        continue;
+                    }
+
+                    match.TeamRedScore = data.TSCORE0;
+                    match.TeamBlueScore = data.TSCORE1;
+
+                    foreach (var item in match.PlayerStats)
+                    {
+                        item.TeamScore = item.Team == Team.Red ? data.TSCORE0 : data.TSCORE1;
+                    }
                 }
                 break;
         }
@@ -178,6 +233,7 @@ public class PlayerEventData
 
 public class RoundOverEventData : MatchEventData
 {
+    public string TEAM_WON { get; set; } = string.Empty;
 }
 
 public class MatchEventData
@@ -195,13 +251,13 @@ public class PlayerStatsEventData
     public int? TEAM { get; set; }
     public int WIN { get; set; }
     public int KILLS { get; set; }
-    public DamageEventData Damage { get; set; } = new();
+    public DamageEventData DAMAGE { get; set; } = new();
 }
 
 public class DamageEventData
 {
-    public int Dealt { get; set; }
-    public int Taken { get; set; }
+    public int DEALT { get; set; }
+    public int TAKEN { get; set; }
 }
 
 public class MatchStartedEventData
@@ -211,4 +267,18 @@ public class MatchStartedEventData
     public string GAME_TYPE { get; set; } = default!;
     public string MAP { get; set; } = default!;
     public Guid MATCH_GUID { get; set; } = default!;
+    public List<PlayersData> PLAYERS { get; set; } = [];
+
+    public class PlayersData
+    {
+        public string STEAM_ID { get; set; } = default!;
+        public int TEAM { get; set; }
+    }
+}
+
+public class MatchReportEventData
+{
+    public Guid MATCH_GUID { get; set; }
+    public int TSCORE0 { get; set; }
+    public int TSCORE1 { get; set; }
 }
