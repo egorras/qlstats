@@ -82,6 +82,11 @@ using (var subscriber = new SubscriberSocket())
             case "PLAYER_DEATH":
                 {
                     var data = JsonSerializer.Deserialize<EventData<PlayerDeathEventData>>(message)!.DATA;
+                    if (data.WARMUP)
+                    {
+                        continue;
+                    }
+
                     var victimSteamId = long.Parse(data.VICTIM.STEAM_ID);
                     if (data.KILLER is null)
                     {
@@ -224,6 +229,7 @@ public class PlayerDeathEventData : MatchEventData
 {
     public PlayerEventData VICTIM { get; set; } = new();
     public PlayerEventData? KILLER { get; set; }
+    public bool WARMUP { get; set; }
 }
 
 public class PlayerEventData
