@@ -176,6 +176,16 @@
                                             <span>)</span>
                                             <i class="fa-solid fa-trophy"></i>
                                         }
+
+                                        @if (Season.PtsPerSuicide != 0)
+                                        {
+                                            <br />
+                                            @(playerStats.Suicides)
+                                            @* <span> (</span>
+                                            @(Season.PtsPerSuicide * playerStats.Suicides)
+                                            <span>)</span> *@
+                                            <i class="fa-solid fa-person-falling"></i>
+                                        }
                                     }
                                     </span>
                                 </td>

@@ -2,7 +2,7 @@
   "profiles": {
     "LocalStorageParser": {
       "commandName": "Project",
-      "commandLineArgs": "--path \"C:\\Programs\\Steam\\steamapps\\common\\Quake Live\\76561198004681283\\Local Storage\\asset_ql_0.localstorage\" --cs \"Data Source=.;Initial Catalog=qlstats;Integrated Security=True;TrustServerCertificate=True;\""
+      "commandLineArgs": "--path \"C:\\Programs\\Steam\\steamapps\\common\\Quake Live\\76561198004681283\\Local Storage\\asset_ql_0.localstorage\" --cs \"Host=ep-empty-mountain-a2dlf6xq.eu-central-1.aws.neon.tech;Database=qlstatsdb;Username=raskhodchikov.egor;Password=4kiBb9CTWUOm;SslMode=Require;\""
     }
   }
 }

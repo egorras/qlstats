@@ -1,9 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using QLStats.Domain.Entities;
 using QLStats.Domain.Enums;
 using QLStats.Infrastructure.Data;
 using QLStats.LocalStorageParser.Models;
-using System.Text.Json;
 
 internal class LocalStorageJsonParser
 {
@@ -24,11 +24,17 @@ internal class LocalStorageJsonParser
     public Task HandleJsonAsync(string key, string json) => key switch
     {
         "match_index" => Task.CompletedTask,
-        var x when x.StartsWith("events_") => Task.CompletedTask,
+        var x when x.StartsWith("events_") => HandleEventsJsonAsunc(json),
         var x when x.StartsWith("match_") => HandleMatchJsonAsync(json),
         var x when x.StartsWith("players_") => HandlePlayersJsonAsync(json),
         _ => Task.CompletedTask
     };
+
+    private async Task HandleEventsJsonAsunc(string _)
+    {
+        //Console.WriteLine(json);
+        await Task.CompletedTask;
+    }
 
     private async Task HandleMatchJsonAsync(string json)
     {
@@ -43,6 +49,10 @@ internal class LocalStorageJsonParser
         {
             match = new Match { MatchGuid = matchJson.MatchGuid };
             _context.Add(match);
+        }
+        else
+        {
+            return;
         }
         MatchJsonMapper.Map(matchJson, match);
         if (match.Id == 0)
@@ -69,7 +79,7 @@ internal class LocalStorageJsonParser
             .Include(x => x.PlayerStats)
             .SingleAsync(x => x.MatchGuid == matchGuid);
 
-        foreach (var playerStatsJson in list.PlyrStats)
+        foreach (var playerStatsJson in list.PlyrStats.OrderBy(x => x.Score))
         {
             var steamId = long.Parse(playerStatsJson.SteamId);
             var player = await _context.Players.FirstOrDefaultAsync(x => x.SteamId == steamId);
@@ -87,6 +97,7 @@ internal class LocalStorageJsonParser
                 match.PlayerStats.Add(playerStats);
             }
 
+            playerStats.Kills = playerStatsJson.Kills;
             playerStats.Win = playerStatsJson.Win == 1;
             playerStats.Score = playerStatsJson.Score;
             playerStats.DamageDealt = playerStatsJson.Damage.Dealt;

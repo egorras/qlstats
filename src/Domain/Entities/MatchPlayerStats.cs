@@ -16,6 +16,7 @@ public class MatchPlayerStats : BaseEntity
     public int DamageDealt { get; set; }
     public int DamageTaken { get; set; }
     public int MedalsTotal { get; set; }
+    public int Suicides { get; set; }
 
     public decimal CalculatePtsFor(Season season)
     {
@@ -53,6 +54,11 @@ public class MatchPlayerStats : BaseEntity
         if (season.PtsPerKill > 0)
         {
             pts += Kills * season.PtsPerKill;
+        }
+
+        if (season.PtsPerSuicide != 0)
+        {
+            pts += Suicides * season.PtsPerSuicide;
         }
 
         return pts;

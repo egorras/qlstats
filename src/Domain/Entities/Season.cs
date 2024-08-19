@@ -11,6 +11,7 @@ public class Season : BaseEntity
     public decimal? DamageForOnePts { get; set; } = 100;
     public int PtsPerMedal { get; set; } = 0;
     public int PtsPerKill { get; set; } = 0;
+    public int PtsPerSuicide { get; set; } = 0;
 
     public override string ToString()
     {
