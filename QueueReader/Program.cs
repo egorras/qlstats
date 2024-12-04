@@ -22,7 +22,7 @@ var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
 var suicideSteamId = new Dictionary<long, int>();
 
-string serverAddress = "tcp://129.152.31.233:27960";
+string serverAddress = "tcp://213.133.99.206:26375";
 using (var subscriber = new SubscriberSocket())
 {
     Console.WriteLine("Connecting to Quake Live server as a subscriber...");
@@ -132,7 +132,7 @@ using (var subscriber = new SubscriberSocket())
                         }
                     }
 
-                    var suicideTimeout = 13;
+                    var suicideTimeout = 11;
 
                     foreach (var steamId in suicideSteamId.Where(x => data.TIME - suicideTimeout < x.Value))
                     {
