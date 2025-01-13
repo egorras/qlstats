@@ -18,8 +18,13 @@ public class MatchPlayerStats : BaseEntity
     public int MedalsTotal { get; set; }
     public int Suicides { get; set; }
 
-    public decimal CalculatePtsFor(Season season)
+    public decimal CalculatePtsFor(Season? season)
     {
+        if (season == null)
+        {
+            return 0;
+        }
+
         var pts = decimal.Zero;
 
         // ClanArena

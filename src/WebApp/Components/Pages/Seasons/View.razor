@@ -43,8 +43,8 @@
                                 <tr>
                                     <td>@topScorer.Place</td>
                                     <td>@topScorer.Player.Name</td>
-                                    <td>@topScorer.TotalPts</td>
-                                    <td>
+                                    <td class="text-end">@topScorer.TotalPts</td>
+                                    <td class="text-end">
                                         @{
                                             var aheadTotalPts = TopScorers.FirstOrDefault(x => x.Place == topScorer.Place - 1).TotalPts;
                                         }
@@ -80,7 +80,7 @@
                                 <tr>
                                     <td>@topScorer.Place</td>
                                     <td>@topScorer.Player.Name</td>
-                                    <td>@topScorer.TotalFalls</td>
+                                    <td class="text-end">@topScorer.TotalFalls</td>
                                 </tr>
                             }
                         </tbody>
@@ -88,13 +88,71 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-8">
+        @if (Season != null)
+        {
+            <div class="col-md-2">
+                <div class="card">
+                    <div class="card-header">
+                        Season Settings
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover table-sm mb-0 table-bordered">
+                            <tbody>
+                                @if (Season?.PtsForClanArenaMatchWin > 0)
+                                {
+                                    <tr>
+                                        <td><i class="fa-solid fa-trophy"></i> Match Win</td>
+                                        <td class="text-end">@Season.PtsForClanArenaMatchWin</td>
+                                    </tr>
+                                }
+                                @if (Season?.PtsForClanArenaRoundWin > 0)
+                                {
+                                    <tr>
+                                        <td><i class="fa-solid fa-circle"></i> Round Win</td>
+                                        <td class="text-end">@Season.PtsForClanArenaRoundWin</td>
+                                    </tr>
+                                }
+                                @if (Season?.PtsPerKill > 0)
+                                {
+                                    <tr>
+                                        <td><i class="fa-solid fa-skull"></i> Kill</td>
+                                        <td class="text-end">@Season.PtsPerKill</td>
+                                    </tr>
+                                }
+                                @if (Season?.PtsPerMedal > 0)
+                                {
+                                    <tr>
+                                        <td><i class="fa-solid fa-medal"></i> Medal</td>
+                                        <td class="text-end">@Season.PtsPerMedal</td>
+                                    </tr>
+                                }
+                                @if (Season?.DamageForOnePts > 0)
+                                {
+                                    <tr>
+                                        <td><i class="fa-solid fa-bolt"></i> Damage for 1 pts</td>
+                                        <td class="text-end">@Season.DamageForOnePts</td>
+                                    </tr>
+                                }
+                                @if (Season?.PtsPerSuicide != 0)
+                                {
+                                    <tr>
+                                        <td><i class="fa-solid fa-person-falling"></i> Fall</td>
+                                        <td class="text-end">@Season?.PtsPerSuicide</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="col-md-6">
             <div>
                 <MudChart ChartType="ChartType.Line"
                 ChartSeries="@Series"
                 @bind-SelectedIndex="Index"
                 Width="100%"
-                Height="500px"
+                Height="300px"
                 ChartOptions="@Options" />
             </div>
         </div>
@@ -158,7 +216,7 @@
                                     <span class="text-secondary">
                                         @if (playerStats != null)
                                         {
-                                            @if(Season.DamageForOnePts > 0)
+                                            @if(Season?.DamageForOnePts > 0)
                                             {
                                                 <br />
                                                 @(playerStats.DamageDealt)
@@ -168,7 +226,7 @@
                                                 <i class="fa-solid fa-bolt"></i>
                                             }
 
-                                            @if (Season.PtsPerMedal > 0)
+                                            @if (Season?.PtsPerMedal > 0)
                                             {
                                                 <br />
                                                 @(playerStats.MedalsTotal)
@@ -178,7 +236,7 @@
                                                 <i class="fa-solid fa-medal"></i>
                                             }
 
-                                            @if (Season.PtsPerKill > 0)
+                                            @if (Season?.PtsPerKill > 0)
                                             {
                                                 <br />
                                                 @(playerStats.Kills)
@@ -191,7 +249,7 @@
                                             <br />
                                             @(playerStats.TeamScore)
                                             <span> (+</span>
-                                            @(Season.PtsForClanArenaRoundWin * playerStats.TeamScore)
+                                            @(Season?.PtsForClanArenaRoundWin * playerStats.TeamScore)
                                             <span>)</span>
                                             <i class="fa-solid fa-circle"></i>
 
@@ -199,12 +257,12 @@
                                             {
                                                 <br />
                                                 <span>(+</span>
-                                                @(Season.PtsForClanArenaMatchWin)
+                                                @(Season?.PtsForClanArenaMatchWin)
                                                 <span>)</span>
                                                 <i class="fa-solid fa-trophy"></i>
                                             }
 
-                                            @if (Season.PtsPerSuicide != 0 && playerStats.Suicides > 0)
+                                            @if (Season?.PtsPerSuicide != 0 && playerStats.Suicides > 0)
                                             {
                                                 <br />
                                                 <span>(-</span>
