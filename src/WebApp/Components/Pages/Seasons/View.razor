@@ -60,14 +60,42 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-10">
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-header">
+                    Top Fallers
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover table-sm mb-0 table-bordered">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Player</th>
+                                <th>Falls</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var topScorer in TopFallers)
+                            {
+                                <tr>
+                                    <td>@topScorer.Place</td>
+                                    <td>@topScorer.Player.Name</td>
+                                    <td>@topScorer.TotalFalls</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
             <div>
                 <MudChart ChartType="ChartType.Line"
-                        ChartSeries="@Series"
-                        @bind-SelectedIndex="Index"
-                        Width="100%"
-                        Height="500px"
-                        ChartOptions="@Options" />
+                ChartSeries="@Series"
+                @bind-SelectedIndex="Index"
+                Width="100%"
+                Height="500px"
+                ChartOptions="@Options" />
             </div>
         </div>
     </div>
@@ -129,26 +157,26 @@
                                     </span>
                                     <span class="text-secondary">
                                         @if (playerStats != null)
-                                    {
-                                        @if(Season.DamageForOnePts > 0)
                                         {
-                                            <br />
-                                            @(playerStats.DamageDealt)
-                                            <span> (+</span>
-                                            @(Math.Floor(playerStats.DamageDealt / Season.DamageForOnePts.Value))
-                                            <span>)</span>
-                                            <i class="fa-solid fa-bolt"></i>
-                                        }
+                                            @if(Season.DamageForOnePts > 0)
+                                            {
+                                                <br />
+                                                @(playerStats.DamageDealt)
+                                                <span> (+</span>
+                                                @(Math.Floor(playerStats.DamageDealt / Season.DamageForOnePts.Value))
+                                                <span>)</span>
+                                                <i class="fa-solid fa-bolt"></i>
+                                            }
 
-                                        @if (Season.PtsPerMedal > 0)
-                                        {
-                                            <br />
-                                            @(playerStats.MedalsTotal)
-                                            <span> (+</span>
-                                            @(Season.PtsPerMedal * playerStats.MedalsTotal)
-                                            <span>)</span>
-                                            <i class="fa-solid fa-medal"></i>
-                                        }
+                                            @if (Season.PtsPerMedal > 0)
+                                            {
+                                                <br />
+                                                @(playerStats.MedalsTotal)
+                                                <span> (+</span>
+                                                @(Season.PtsPerMedal * playerStats.MedalsTotal)
+                                                <span>)</span>
+                                                <i class="fa-solid fa-medal"></i>
+                                            }
 
                                             @if (Season.PtsPerKill > 0)
                                             {
@@ -160,21 +188,21 @@
                                                 <i class="fa-solid fa-skull"></i>
                                             }
 
-                                        <br />
-                                        @(playerStats.TeamScore)
-                                        <span> (+</span>
-                                        @(Season.PtsForClanArenaRoundWin * playerStats.TeamScore)
-                                        <span>)</span>
-                                        <i class="fa-solid fa-circle"></i>
-
-                                        @if (playerStats.Win)
-                                        {
                                             <br />
-                                            <span>(+</span>
-                                            @(Season.PtsForClanArenaMatchWin)
+                                            @(playerStats.TeamScore)
+                                            <span> (+</span>
+                                            @(Season.PtsForClanArenaRoundWin * playerStats.TeamScore)
                                             <span>)</span>
-                                            <i class="fa-solid fa-trophy"></i>
-                                        }
+                                            <i class="fa-solid fa-circle"></i>
+
+                                            @if (playerStats.Win)
+                                            {
+                                                <br />
+                                                <span>(+</span>
+                                                @(Season.PtsForClanArenaMatchWin)
+                                                <span>)</span>
+                                                <i class="fa-solid fa-trophy"></i>
+                                            }
 
                                             @if (Season.PtsPerSuicide != 0 && playerStats.Suicides > 0)
                                             {
@@ -205,6 +233,7 @@
     List<Match>? Matches = null;
     List<Player> Players = [];
     List<(Player Player, decimal TotalPts, int Place)> TopScorers = [];
+    List<(Player Player, decimal TotalFalls, int Place)> TopFallers = [];
 
     private int Index = -1;
     public ChartOptions Options = new ChartOptions();
@@ -263,10 +292,12 @@
                 .ToList();
 
             TopScorers.Clear();
+            TopFallers.Clear();
             Series.Clear();
             foreach (var player in Players)
             {
                 double runningTotal = 0;
+                double totalFalls = 0;
                 Series.Add(new ChartSeries
                     {
                         Name = player.Name,
@@ -275,15 +306,22 @@
                             var stats = x.PlayerStats
                             .Where(x => x.Score > 0).FirstOrDefault(x => x.PlayerId == player.Id);
                             runningTotal += (double?)stats?.CalculatePtsFor(Season) ?? 0;
+                            totalFalls += stats?.Suicides ?? 0;
                             return runningTotal;
                         }).ToArray()
                     });
                 TopScorers.Add(new(player, (decimal)runningTotal, 0));
+                TopFallers.Add(new(player, (decimal)totalFalls, 0));
             }
 
             TopScorers = TopScorers
                 .OrderByDescending(x => x.TotalPts)
                 .Select((x, i) => (x.Player, x.TotalPts, i + 1))
+                .ToList();
+
+            TopFallers = TopFallers
+                .OrderByDescending(x => x.TotalFalls)
+                .Select((x, i) => (x.Player, x.TotalFalls, i + 1))
                 .ToList();
         }
         catch (Exception)
