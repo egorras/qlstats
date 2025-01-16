@@ -162,6 +162,8 @@
         @foreach (var player in Players)
         {
             var stats = GetPlayerPointsBreakdown(player);
+            var falls = stats.GetValueOrDefault("Falls", 0);
+            var displayStats = stats.Where(x => x.Key != "Falls").ToDictionary(x => x.Key, x => x.Value);
             var total = stats.Values.Sum();
             <div class="col-md-3 mb-3">
                 <div class="card">
@@ -172,8 +174,8 @@
                         <MudChart ChartType="ChartType.Pie"
                                  Width="100%"
                                  Height="200px"
-                                 InputData="@stats.Values.ToArray()"
-                                 InputLabels="@(stats.Select(x => $"{x.Key} ({(x.Value/total*100):N1}%)").ToArray())" />
+                                 InputData="@displayStats.Values.ToArray()"
+                                 InputLabels="@(displayStats.Select(x => $"{x.Key} ({(x.Value/total*100):N1}%)").ToArray())" />
                     </div>
                 </div>
             </div>
@@ -427,8 +429,7 @@
         if (Season?.PtsForClanArenaMatchWin > 0)
         {
             var matchWinPoints = playerMatches.Count(ps => ps.Win) * Season.PtsForClanArenaMatchWin;
-            if (matchWinPoints > 0)
-                breakdown["Match Wins"] = (double)matchWinPoints;
+            breakdown["Match Wins"] = (double)matchWinPoints;
         }
 
         if (Season?.PtsForClanArenaRoundWin > 0)
@@ -461,8 +462,8 @@
 
         if (Season is not null && Season?.PtsPerSuicide != 0)
         {
-            var suicidePoints = Math.Abs(playerMatches.Sum(ps => ps.Suicides * Season!.PtsPerSuicide));
-            if (suicidePoints > 0)
+            var suicidePoints = playerMatches.Sum(ps => ps.Suicides * Season!.PtsPerSuicide);
+            if (suicidePoints != 0)
                 breakdown["Falls"] = (double)suicidePoints;
         }
 
