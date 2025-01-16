@@ -175,7 +175,7 @@
                                  Width="100%"
                                  Height="200px"
                                  InputData="@displayStats.Values.ToArray()"
-                                 InputLabels="@(displayStats.Select(x => $"{x.Key} ({(x.Value/total*100):N1}%)").ToArray())" />
+                                 InputLabels="@(displayStats.Select(x => $"{x.Key} ({x.Value:N0} pts, {(x.Value/total*100):N1}%)").ToArray())" />
                     </div>
                 </div>
             </div>
