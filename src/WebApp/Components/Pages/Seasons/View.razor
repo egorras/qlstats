@@ -158,6 +158,28 @@
         </div>
     </div>
 
+    <div class="row mt-3">
+        @foreach (var player in Players)
+        {
+            var stats = GetPlayerPointsBreakdown(player);
+            var total = stats.Values.Sum();
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        @player.Name - Points Breakdown (@total pts)
+                    </div>
+                    <div class="card-body">
+                        <MudChart ChartType="ChartType.Pie"
+                                 Width="100%"
+                                 Height="200px"
+                                 InputData="@stats.Values.ToArray()"
+                                 InputLabels="@(stats.Select(x => $"{x.Key} ({(x.Value/total*100):N1}%)").ToArray())" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
     <div class="card">
         <div class="card-header">
             Matches
@@ -394,5 +416,56 @@
         {
             await _pollingTimer.DisposeAsync();
         }
+    }
+
+    private Dictionary<string, double> GetPlayerPointsBreakdown(Player player)
+    {
+        var breakdown = new Dictionary<string, double>();
+        var playerMatches = Matches!.SelectMany(m => m.PlayerStats)
+                                  .Where(ps => ps.PlayerId == player.Id);
+
+        if (Season?.PtsForClanArenaMatchWin > 0)
+        {
+            var matchWinPoints = playerMatches.Count(ps => ps.Win) * Season.PtsForClanArenaMatchWin;
+            if (matchWinPoints > 0)
+                breakdown["Match Wins"] = (double)matchWinPoints;
+        }
+
+        if (Season?.PtsForClanArenaRoundWin > 0)
+        {
+            var roundPoints = playerMatches.Sum(ps => ps.TeamScore * Season.PtsForClanArenaRoundWin);
+            if (roundPoints > 0)
+                breakdown["Round Wins"] = (double)roundPoints;
+        }
+
+        if (Season?.PtsPerKill > 0)
+        {
+            var killPoints = playerMatches.Sum(ps => ps.Kills * Season.PtsPerKill);
+            if (killPoints > 0)
+                breakdown["Kills"] = (double)killPoints;
+        }
+
+        if (Season?.PtsPerMedal > 0)
+        {
+            var medalPoints = playerMatches.Sum(ps => ps.MedalsTotal * Season.PtsPerMedal);
+            if (medalPoints > 0)
+                breakdown["Medals"] = (double)medalPoints;
+        }
+
+        if (Season?.DamageForOnePts > 0)
+        {
+            var damagePoints = playerMatches.Sum(ps => Math.Floor(ps.DamageDealt / Season.DamageForOnePts.Value));
+            if (damagePoints > 0)
+                breakdown["Damage"] = (double)damagePoints;
+        }
+
+        if (Season is not null && Season?.PtsPerSuicide != 0)
+        {
+            var suicidePoints = Math.Abs(playerMatches.Sum(ps => ps.Suicides * Season!.PtsPerSuicide));
+            if (suicidePoints > 0)
+                breakdown["Falls"] = (double)suicidePoints;
+        }
+
+        return breakdown;
     }
 }
