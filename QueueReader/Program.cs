@@ -173,6 +173,7 @@ using (var subscriber = new SubscriberSocket())
                     playerStats.Score = data.SCORE;
                     playerStats.DamageDealt = data.DAMAGE.DEALT;
                     playerStats.DamageTaken = data.DAMAGE.TAKEN;
+                    playerStats.MedalsTotal = data.MEDALS.PERFECT;
 
                     if (data.TEAM != null)
                     {
@@ -258,6 +259,7 @@ public class PlayerStatsEventData
     public int WIN { get; set; }
     public int KILLS { get; set; }
     public DamageEventData DAMAGE { get; set; } = new();
+    public MedalsEventData MEDALS { get; set; } = new();
 }
 
 public class DamageEventData
@@ -265,6 +267,12 @@ public class DamageEventData
     public int DEALT { get; set; }
     public int TAKEN { get; set; }
 }
+
+public class MedalsEventData
+{
+    public int PERFECT { get; set; }
+}
+
 
 public class MatchStartedEventData
 {
