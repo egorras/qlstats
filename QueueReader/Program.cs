@@ -21,6 +21,7 @@ using var scope = serviceProvider.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
 var suicideSteamId = new Dictionary<long, int>();
+var lowHpKillers = new Dictionary<long, int>();
 
 string serverAddress = "tcp://213.133.99.206:26544";
 using (var subscriber = new SubscriberSocket())
@@ -95,6 +96,15 @@ using (var subscriber = new SubscriberSocket())
                     else
                     {
                         suicideSteamId.Remove(victimSteamId);
+                        if (data.KILLER.HEALTH <= 5)
+                        {
+                            lowHpKillers.TryAdd(victimSteamId, 0);
+                            lowHpKillers[victimSteamId] +=
+                                data.KILLER.HEALTH == 5 ? 1
+                                : data.KILLER.HEALTH == 4 ? 2
+                                : data.KILLER.HEALTH == 3 ? 3
+                                : data.KILLER.HEALTH == 2 ? 4 : 5;
+                        }
                     }
                 }
                 break;
@@ -120,6 +130,10 @@ using (var subscriber = new SubscriberSocket())
                         foreach (var playerStat in match.PlayerStats.Where(x => x.Team == teamWon))
                         {
                             playerStat.TeamScore += 1;
+                            if (lowHpKillers.TryGetValue(playerStat.PlayerId, out var lowHpKillsPts))
+                            {
+                                playerStat.LowHpKillsPts += lowHpKillsPts;
+                            }
                         }
 
                         if (teamWon == Team.Red)
@@ -147,6 +161,7 @@ using (var subscriber = new SubscriberSocket())
                     }
 
                     suicideSteamId.Clear();
+                    lowHpKillers.Clear();
                 }
                 break;
             case "PLAYER_STATS":
@@ -236,6 +251,7 @@ public class PlayerDeathEventData : MatchEventData
 public class PlayerEventData
 {
     public string STEAM_ID { get; set; } = string.Empty;
+    public int HEALTH { get; set; }
 }
 
 public class RoundOverEventData : MatchEventData

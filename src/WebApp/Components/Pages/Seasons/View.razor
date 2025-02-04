@@ -88,6 +88,62 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-header">
+                    Top Perfects
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover table-sm mb-0 table-bordered">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Player</th>
+                                <th>Perfects</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var topScorer in TopPerfects)
+                            {
+                                <tr>
+                                    <td>@topScorer.Place</td>
+                                    <td>@topScorer.Player.Name</td>
+                                    <td class="text-end">@topScorer.TotalPerfects</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-header">
+                    Top Survivers
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover table-sm mb-0 table-bordered">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Player</th>
+                                <th>Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var topScorer in TopSurvivers)
+                            {
+                                <tr>
+                                    <td>@topScorer.Place</td>
+                                    <td>@topScorer.Player.Name</td>
+                                    <td class="text-end">@topScorer.TotalSurvivers</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
         @if (Season != null)
         {
             <div class="col-md-2">
@@ -122,7 +178,7 @@
                                 @if (Season?.PtsPerMedal > 0)
                                 {
                                     <tr>
-                                        <td><i class="fa-solid fa-medal"></i> Medal</td>
+                                        <td><i class="fa-solid fa-medal"></i> Perfect</td>
                                         <td class="text-end">@Season.PtsPerMedal</td>
                                     </tr>
                                 }
@@ -172,10 +228,10 @@
                     </div>
                     <div class="card-body">
                         <MudChart ChartType="ChartType.Pie"
-                                 Width="100%"
-                                 Height="200px"
-                                 InputData="@displayStats.Values.ToArray()"
-                                 InputLabels="@(displayStats.Select(x => $"{x.Key} ({x.Value:N0} pts, {(x.Value/total*100):N1}%)").ToArray())" />
+                        Width="100%"
+                        Height="200px"
+                        InputData="@displayStats.Values.ToArray()"
+                        InputLabels="@(displayStats.Select(x => $"{x.Key} ({x.Value:N0} pts, {(x.Value/total*100):N1}%)").ToArray())" />
                     </div>
                 </div>
             </div>
@@ -294,6 +350,12 @@
                                                 <span>)</span>
                                                 <i class="fa-solid fa-person-falling"></i>
                                             }
+
+                                            <br />
+                                            <span>(+</span>
+                                            @(playerStats.LowHpKillsPts)
+                                            <span>)</span>
+                                            <i class="fa-solid fa-notes-medical"></i>
                                         }
                                     </span>
                                 </td>
@@ -316,6 +378,8 @@
     List<Player> Players = [];
     List<(Player Player, decimal TotalPts, int Place)> TopScorers = [];
     List<(Player Player, decimal TotalFalls, int Place)> TopFallers = [];
+    List<(Player Player, decimal TotalPerfects, int Place)> TopPerfects = [];
+    List<(Player Player, decimal TotalSurvivers, int Place)> TopSurvivers = [];
 
     private int Index = -1;
     public ChartOptions Options = new ChartOptions();
@@ -375,11 +439,15 @@
 
             TopScorers.Clear();
             TopFallers.Clear();
+            TopPerfects.Clear();
+            TopSurvivers.Clear();
             Series.Clear();
             foreach (var player in Players)
             {
                 double runningTotal = 0;
                 double totalFalls = 0;
+                double totalSurvives = 0;
+                double totalPerfects = 0;
                 Series.Add(new ChartSeries
                     {
                         Name = player.Name,
@@ -389,11 +457,15 @@
                             .Where(x => x.Score > 0).FirstOrDefault(x => x.PlayerId == player.Id);
                             runningTotal += (double?)stats?.CalculatePtsFor(Season) ?? 0;
                             totalFalls += stats?.Suicides ?? 0;
+                            totalSurvives += stats?.LowHpKillsPts ?? 0;
+                            totalPerfects += stats?.MedalsTotal ?? 0;
                             return runningTotal;
                         }).ToArray()
                     });
                 TopScorers.Add(new(player, (decimal)runningTotal, 0));
                 TopFallers.Add(new(player, (decimal)totalFalls, 0));
+                TopSurvivers.Add(new(player, (decimal)totalSurvives, 0));
+                TopPerfects.Add(new(player, (decimal)totalPerfects, 0));
             }
 
             TopScorers = TopScorers
@@ -404,6 +476,16 @@
             TopFallers = TopFallers
                 .OrderByDescending(x => x.TotalFalls)
                 .Select((x, i) => (x.Player, x.TotalFalls, i + 1))
+                .ToList();
+
+            TopPerfects = TopPerfects
+                .OrderByDescending(x => x.TotalPerfects)
+                .Select((x, i) => (x.Player, x.TotalPerfects, i + 1))
+                .ToList();
+
+            TopSurvivers = TopSurvivers
+                .OrderByDescending(x => x.TotalSurvivers)
+                .Select((x, i) => (x.Player, x.TotalSurvivers, i + 1))
                 .ToList();
         }
         catch (Exception)
@@ -450,7 +532,7 @@
         {
             var medalPoints = playerMatches.Sum(ps => ps.MedalsTotal * Season.PtsPerMedal);
             if (medalPoints > 0)
-                breakdown["Medals"] = (double)medalPoints;
+                breakdown["Perfects"] = (double)medalPoints;
         }
 
         if (Season?.DamageForOnePts > 0)
@@ -465,6 +547,13 @@
             var suicidePoints = playerMatches.Sum(ps => ps.Suicides * Season!.PtsPerSuicide);
             if (suicidePoints != 0)
                 breakdown["Falls"] = (double)suicidePoints;
+        }
+
+        if (Season is not null)
+        {
+            var lowHpKillsPts = playerMatches.Sum(ps => ps.LowHpKillsPts);
+            if (lowHpKillsPts != 0)
+                breakdown["Survivers"] = (double)lowHpKillsPts;
         }
 
         return breakdown;
